@@ -522,10 +522,10 @@ A Pandas DataFrame containing two columns:
   - `target`: Corresponding target truth values.
 
 
-- `builtin_metrics`: `Dict[str, int]`.  
+- `builtin_metrics`: `Dict[str, float]`.  
 The built-in metrics calculated during model evaluation. Maps metric names to corresponding scalar values.
 
-The custom metric function should return a `Dict[str, int]`, mapping custom metric names to corresponding scalar metric values.
+The custom metric function should return a scalar numeric value.
 
 Custom metrics are specified as a list under the `metrics.custom` key in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml), specified as follows:
 - `name`: string. Required.  
