@@ -1,0 +1,39 @@
+#
+# FIXME::REQUIRED: set an MLflow experiment name to track recipe executions and artifacts.
+#
+experiment:
+  name: ""
+  tracking_uri: "sqlite:///metadata/mlflow/mlruns.db"
+  artifact_location: "./metadata/mlflow/mlartifacts"
+model_registry:
+#
+# FIXME::OPTIONAL: Set the registry server URI. This property is especially useful if you have a
+#                  registry server that’s different from the tracking server.
+#   uri: "sqlite:///metadata/mlflow/registry.db"
+# FIXME::REQUIRED: Specifies the name of the Registered Model to use when registering a trained
+#                  model to the MLflow Model Registry.
+  model_name: ""
+
+INGEST_CONFIG:
+  #
+  # FIXME::REQUIRED: Specify the format of the training and evaluation dataset. Natively supported
+  #                  formats are: parquet, spark_sql, delta.
+  using: ""
+  # FIXME::OPTIONAL: Specify the training and evaluation data location.
+  # location: ""
+
+# INGEST_SCORING_CONFIG:
+#   For different options please read: https://github.com/mlflow/recipes-regression-template#batch-scoring
+#   FIXME::OPTIONAL: Specify the format of the scoring dataset. Natively supported formats are:
+#                    parquet, spark_sql, delta.
+#   using: ""
+#   FIXME::OPTIONAL: Specify the scoring data location.
+#   location: ""
+
+# PREDICT_OUTPUT_CONFIG:
+#   For different options please read: https://github.com/mlflow/recipes-regression-template#predict-step
+#   FIXME::OPTIONAL: Specify the format of the scored dataset. Natively supported formats are:
+#                    parquet, delta, table.
+#   using: ""
+#   FIXME::OPTIONAL: Specify the output location of the batch scoring predict step.
+#   location: ""
