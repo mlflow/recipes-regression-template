@@ -245,22 +245,37 @@ transformation during model training and inference. If absent, an identity trans
 
 
 ### Train step
-The train step uses the transformed training dataset output from the transform step to fit an user-defined estimator. 
-The estimator is then joined with the fitted transformer output from the transform step to create a model recipe. 
-Finally, this model recipe is evaluated against the transformed training and validation datasets to compute performance metrics.  
+The train step uses the transformed training dataset output from the transform step to fit an 
+[AutoML](https://github.com/microsoft/FLAML) or user-defined estimator. The estimator is then joined with the fitted transformer output 
+from the transform step to create a model recipe. Finally, this model recipe is evaluated against 
+the transformed training and validation datasets to compute performance metrics.  
 
 Custom evaluation metrics are computed according to definitions in [`steps/custom_metrics.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/custom_metrics.py)
 and the `metrics` section of `recipe.yaml`; see [Custom Metrics](#custom-metrics) section for reference. 
 
 The model recipe and its associated parameters, performance metrics, and lineage information are logged to [MLflow Tracking](https://www.mlflow.org/docs/latest/tracking.html), producing an MLflow Run.
 
+The train step is configured by the `steps.train` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+
+If using AutoML to train, specify
+```
+using: automl/flaml
+```
+
+If using the user-defined estimator function to train, specify
+```
+estimator_method: estimator_spec
+```
+
 The user-defined estimator function should be written in [`steps/train.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/train.py), 
 and should return an unfitted estimator that is `sklearn`-compatible; that is, the returned object should define 
 `fit()` and `transform()` methods. `steps/train.py` contains an example placeholder function.
 
-The train step is configured by the `steps.train` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
 <details>
 <summary><strong><u>Full configuration reference</u></strong></summary>
+
+- `using`: string. Required.  
+`automl/flaml` if using AutoML to train or `estimator_spec` if using a user-defined estimator to train.
 
 - `estimator_method`: string. Required.  
 Fully qualified name of the method that returns an `sklearn`-compatible estimator used for model training.  
