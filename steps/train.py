@@ -16,6 +16,5 @@ def estimator_fn(estimator_params: Dict[str, Any] = {}):
     #
     # FIXME::OPTIONAL: return a scikit-learn-compatible regression estimator with fine-tuned
     #                  hyperparameters.
-    from sklearn.linear_model import SGDRegressor
 
-    return SGDRegressor(**estimator_params)
+    raise NotImplementedError
