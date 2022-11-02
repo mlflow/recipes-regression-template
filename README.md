@@ -257,12 +257,12 @@ The model recipe and its associated parameters, performance metrics, and lineage
 
 The train step is configured by the `steps.train` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
 
-If using AutoML to train, specify
+If using AutoML to train, specify:
 ```
 using: automl/flaml
 ```
 
-If using the user-defined estimator function to train, specify
+Otherwise, if using a user-defined estimator function to train, specify:
 ```
 estimator_method: estimator_spec
 ```
@@ -276,6 +276,13 @@ and should return an unfitted estimator that is `sklearn`-compatible; that is, t
 
 - `using`: string. Required.  
 `automl/flaml` if using AutoML to train or `estimator_spec` if using a user-defined estimator to train.
+
+- AutoML configuration reference
+   - `time_budget_secs`: float. Optional.  
+   A float number of the time budget in seconds. Default to 10 seconds.
+
+   - `flaml_params`: Dict. Optional.  
+   Any additional parameters to pass along to FLAML.
 
 - `estimator_method`: string. Required.  
 Fully qualified name of the method that returns an `sklearn`-compatible estimator used for model training.  
