@@ -15,7 +15,7 @@
 # NOTE: YAML does not support tabs for indentation. Please use spaces and ensure that all YAML
 #       files are properly formatted.
 
-template: "regression/v1"
+recipe: "regression/v1"
 # FIXME::REQUIRED: Specifies the target column name for model training and evaluation.
 target_col: ""
 # FIXME::REQUIRED: Sets the primary metric to use to evaluate model performance. This primary
@@ -43,9 +43,10 @@ steps:
     #                   applies input feature transformation during model training and inference.
     transformer_method: steps.transform.transformer_fn
   train:
-    using: estimator_spec
-    # Specifies the method that defines the estimator type and parameters to use for model training
-    estimator_method: steps.train.estimator_fn
+    #
+    # FIXME::REQUIRED: Specifies the method to use for training. Options are "automl/flaml" for 
+    #                  AutoML training or "estimator_spec" for user-defined estimators.
+    using: ""
   evaluate:
     #
     # FIXME::OPTIONAL: Sets performance thresholds that a trained model must meet in order to be
