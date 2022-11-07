@@ -29,7 +29,12 @@ Your contribution to MLflow Recipes is greatly appreciated by the community!
 - Cards containing step results, including dataset profiles, model leaderboard, performance plots and more
 
 ## Installation
-Follow the [MLflow Recipes installation guide](https://mlflow.org/docs/latest/recipes.html#installation). 
+To use this MLflow regression recipe,
+simply install the packages listed in the `requirements.txt` file. Note that `Python 3.8` or above is recommended.
+```
+pip install requirements.txt
+```
+
 You may need to install additional libraries for extra features:
 - [Hyperopt](https://pypi.org/project/hyperopt/)  is required for hyperparameter tuning.
 - [PySpark](https://pypi.org/project/pyspark/)  is required for distributed training or to ingest Spark tables.
