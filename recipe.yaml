@@ -44,8 +44,8 @@ steps:
     transformer_method: steps.transform.transformer_fn
   train:
     #
-    # FIXME::REQUIRED: Specifies the method to use for training. Options are "automl/flaml" for 
-    #                  AutoML training or "estimator_spec" for user-defined estimators.
+    # FIXME::REQUIRED: Specifies the method to use for training. Options are "automl/flaml" for
+    #                  AutoML training or "custom" for user-defined estimators.
     using: ""
   evaluate:
     #
