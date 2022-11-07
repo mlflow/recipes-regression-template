@@ -10,7 +10,6 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install mlflow[recipes]
 # MAGIC %pip install -r ../requirements.txt
 
 # COMMAND ----------
