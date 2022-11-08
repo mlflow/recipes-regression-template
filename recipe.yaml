@@ -36,12 +36,12 @@ steps:
     #
     #  FIXME::OPTIONAL: Specifies the method to use to "post-process" the split datasets. Note that
     #                   arbitrary transformations should go into the transform step.
-    post_split_filter_method: steps.split.create_dataset_filter
+    post_split_filter_method: create_dataset_filter
   transform:
     #
     #  FIXME::OPTIONAL: Specifies the method that defines an sklearn-compatible transformer, which
     #                   applies input feature transformation during model training and inference.
-    transformer_method: steps.transform.transformer_fn
+    transformer_method: transformer_fn
   train:
     #
     # FIXME::REQUIRED: Specifies the method to use for training. Options are "automl/flaml" for

@@ -153,10 +153,10 @@ One of `parquet`, `spark_sql` and `delta`.
 
 
 - `loader_method`: string. Optional.  
-Fully qualified name of the custom loader function.  
+Method name of the custom loader function from `steps/ingest.py`.  
 <u>Example</u>: 
   ```
-  loader_method: steps.ingest.load_file_as_dataframe
+  loader_method: load_file_as_dataframe
   ```
 
 - `sql`: string. Required if format is `spark_sql`.  
@@ -203,13 +203,13 @@ A YAML list specifying the ratios by which to split the dataset into training, v
   ```
   split_ratios: [0.75, 0.125, 0.125] # Defaults to this ratio if unspecified
   ```
-- `post_split_filter_method`: string. Optional.   
-Fully qualified name of the method to use to "post-process" the split datasets. 
+- `post_split_filter_method`: string. Optional.
+Name of the method specified in `steps/split.py` used to "post-process" the split datasets.  
 This procedure is meant for removing/filtering records, or other cleaning processes. Arbitrary data transformations 
 should be done in the transform step.  
 <u>Example</u>:
   ```
-  post_split_filter_method: steps.split.process_splits
+  post_split_filter_method: process_splits
   ```
 </details>
 
@@ -235,11 +235,11 @@ The transform step is configured by the `steps.transform` section in [`recipe.ya
 <summary><strong><u>Full configuration reference</u></strong></summary>
 
 - `transformer_method`: string. Optional.  
-Fully qualified name of the method that returns an `sklearn`-compatible transformer which applies feature 
-transformation during model training and inference. If absent, an identity transformer with will be used.
+Name of the method specified in `steps/transform.py` that returns an `sklearn`-compatible transformer which applies
+feature transformation during model training and inference. If absent, an identity transformer with will be used.
 <u>Example</u>:
   ```
-  transformer_method: steps.split.transformer_fn
+  transformer_method: transformer_fn
   ```
 
 </details>
@@ -291,10 +291,11 @@ and should return an unfitted estimator that is `sklearn`-compatible; that is, t
    Any additional parameters to pass along to FLAML.
 
 - `estimator_method`: string. Required.  
-Fully qualified name of the method that returns an `sklearn`-compatible estimator used for model training.  
+Name of the method specified in `steps/train.py` that returns an `sklearn`-compatible estimator
+used for model training.  
 <u>Example</u>:
   ```
-  estimator_method: steps.train.estimator_fn
+  estimator_method: estimator_fn
   ```
 
 - Tuning configuration reference
@@ -570,6 +571,6 @@ An example custom metric configuration is as follows:
 ```
 custom_metrics:
  - name: weighted_mean_square_error
-   function: steps.custom_metrics.get_custom_metrics
+   function: get_custom_metrics
    greater_is_better: True
 ```
