@@ -50,7 +50,8 @@ Note that iteration will likely involve filling in the optional `FIXME`s in the
 step code files with your own code, in addition to the configuration keys.
 
 ## Reference
-![image](https://user-images.githubusercontent.com/66143562/195912433-f1e44829-dea5-4fb2-a034-b197c2cebf71.png)
+<img width="710" alt="DAG" src="https://user-images.githubusercontent.com/78067366/200443468-bde64875-c3af-4e89-a36d-7b5b73297d51.png">
+
 
 This is a visual overview of the MLflow Regression Recipe's information flow.
 
