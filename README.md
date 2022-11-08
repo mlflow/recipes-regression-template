@@ -146,11 +146,11 @@ One may specify multiple data locations by a list of locations as long as they h
 One of `parquet`, `spark_sql` and `delta`.  
 
 
-- `custom_loader_method`: string. Optional.  
+- `loader_method`: string. Optional.  
 Fully qualified name of the custom loader function.  
 <u>Example</u>: 
   ```
-  custom_loader_method: steps.ingest.load_file_as_dataframe
+  loader_method: steps.ingest.load_file_as_dataframe
   ```
 
 - `sql`: string. Required if format is `spark_sql`.  
@@ -264,7 +264,7 @@ using: automl/flaml
 
 Otherwise, if using a user-defined estimator function to train, specify:
 ```
-estimator_method: estimator_spec
+using: custom
 ```
 
 The user-defined estimator function should be written in [`steps/train.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/train.py), 
@@ -275,7 +275,7 @@ and should return an unfitted estimator that is `sklearn`-compatible; that is, t
 <summary><strong><u>Full configuration reference</u></strong></summary>
 
 - `using`: string. Required.  
-`automl/flaml` if using AutoML to train or `estimator_spec` if using a user-defined estimator to train.
+`automl/flaml` if using AutoML to train or `custom` if using a user-defined estimator to train.
 
 - AutoML configuration reference
    - `time_budget_secs`: float. Optional.  
