@@ -9,7 +9,7 @@ It provides a recipe structure for creating models as well as pointers to config
 be filled in to produce a working recipe.
 
 Code developed with this template should be run with [MLflow Recipes](https://mlflow.org/docs/latest/recipes.html). 
-An example implementation of this template can be found in the [Recipe Regression Example repo](https://github.com/mlflow/recipes-examples), 
+An example implementation of this template can be found in the [Recipe Regression Example repo](https://github.com/mlflow/recipes-examples/tree/main/regression), 
 which targets the NYC taxi dataset for its training problem.
 
 **Note**: [MLflow Recipes](https://mlflow.org/docs/latest/recipes.html)
