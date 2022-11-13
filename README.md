@@ -149,7 +149,8 @@ One may specify multiple data locations by a list of locations as long as they h
   location: ["./data/sample.parquet", "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2022-01.parquet"]
   ```
 - `using`: string. Required.  
-One of `parquet`, `spark_sql` and `delta`.  
+One of `parquet`, `spark_sql` and `delta`, or the custom file format specified by the
+loaer function in `steps/ingest.py` (ex. `csv`).
 
 
 - `loader_method`: string. Optional.  
