@@ -122,19 +122,14 @@ and converts it to parquet format, leveraging the custom loader code specified i
 you must manually re-run the ingest step in order to use the updated dataset in the recipe. 
 The ingest step does not automatically detect changes in the dataset.
 
-The custom loader function allows use of datasets in other formats, such as `csv`. 
-The function should be defined in [`steps/ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py),
-and should accept two parameters:
-- `file_path`: `str`. Path to the dataset file.
-- `file_format`: `str`. The file format string, such as `"csv"`.
-
-It should return a Pandas DataFrame representing the content of the specified file. [`steps/ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py) contains an example placeholder function.
+Below are all the possible options and full reference guide for different configurations allowed in ingest step:
 
 The input dataset is specified by the `steps.ingest` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml) as follows: 
-<details>
-<summary><strong><u>Full configuration reference</u></strong></summary>
 
-- `location`: string. Required, unless `format` is `spark_sql`.  
+<details>
+<summary><strong><u>Using: "parquet"</u></strong></summary>
+
+- `location`: string. Required.  
 Dataset locations on the local filesystem are supported, as 
 well as HTTP(S) URLs and any other remote locations [resolvable by MLflow](https://mlflow.org/docs/latest/tracking.html#artifact-stores).
 One may specify multiple data locations by a list of locations as long as they have the same data format (see example below)
@@ -148,28 +143,107 @@ One may specify multiple data locations by a list of locations as long as they h
   ```
   location: ["./data/sample.parquet", "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2022-01.parquet"]
   ```
-- `using`: string. Required.  
-One of `parquet`, `spark_sql` and `delta`, or the custom file format specified by the
-loader function in `steps/ingest.py` (ex. `csv`).
 
+Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+```
+steps:
+  ingest:
+    using: "parquet"
+    location: "./data/sample.parquet"
+```
 
-- `loader_method`: string. Optional.  
-Method name of the custom loader function from `steps/ingest.py`.  
-<u>Example</u>: 
+</details>
+
+<details>
+<summary><strong><u>Using: "delta"</u></strong></summary>
+
+- `location`: string. Required.  
+A path pointing to the Delta table location or a catalog path (when running on Databricks) of the format "catalog.schema.table", for more details on the table format, see [here](https://docs.databricks.com/data-governance/unity-catalog/index.html)
+<u>Examples</u>:
   ```
-  loader_method: load_file_as_dataframe
+  location: catalog.schema.table
   ```
-
-- `sql`: string. Required if format is `spark_sql`.  
-Specifies a SparkSQL statement that identifies the dataset to use.
-
+  ```
+  location: "dbfs:/user/hive/warehouse/ml.db/all_prices_1990_2021_mar"
+  ```
 
 - `version`: int. Optional.  
-If the `delta` format is specified, use this to specify the Delta table version to read from.
+Use this to specify the Delta table version to read from.
 
 
-- `timestamp`: timestamp. Optional.  
-If the `delta` format is specified, use this to specify the timestamp at which to read data.
+- `timestamp`: timestamp. Optional.
+Use this to specify the timestamp at which to read data.
+
+Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+```
+steps:
+  ingest:
+    using: "delta"
+    location: "dbfs:/user/hive/warehouse/ml.db/all_prices_1990_2021_mar"
+    version: 1
+```
+</details>
+
+<details>
+<summary><strong><u>Using: "spark_sql"</u></strong></summary>
+
+- `sql`: string. Required.  
+Specifies a SparkSQL statement that identifies the dataset to use. Either location or sql must be specified
+<u>Examples</u>:
+  ```
+  sql: "SELECT * FROM delta.`dbfs:/databricks-datasets/nyctaxi-with-zipcodes/subsampled`"
+  ```
+
+Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+```
+steps:
+  ingest:
+    using: "spark_sql"
+    sql: "SELECT * FROM delta.`dbfs:/databricks-datasets/nyctaxi-with-zipcodes/subsampled`"
+```
+
+</details>
+
+<details>
+<summary><strong><u>Using: "custom"</u></strong></summary>
+
+- `location`: string. Required.  
+Dataset locations on the local filesystem are supported, as 
+well as HTTP(S) URLs and any other remote locations [resolvable by MLflow](https://mlflow.org/docs/latest/tracking.html#artifact-stores).
+One may specify multiple data locations by a list of locations as long as they have the same data format (see example below)
+<u>Examples</u>:
+  ```
+  location: ./data/sample.csv
+  ```
+  ```
+  location: https://raw.githubusercontent.com/fivethirtyeight/uber-tlc-foil-response/master/uber-trip-data/uber-raw-data-apr14.csv
+  ```
+  ```
+  location: ["./data/sample.parquet", "https://raw.githubusercontent.com/fivethirtyeight/uber-tlc-foil-response/master/uber-trip-data/uber-raw-data-apr14.csv"]
+  ```
+
+- `loader_method`: string.  
+Method name of the custom loader function from `steps/ingest.py`. The custom loader function allows use of datasets in other formats, such as `csv`. 
+The function should be defined in [`steps/ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py),
+and should accept two parameters:
+  - `file_path`: `str`. Path to the dataset file.
+  - `file_format`: `str`. The file format string, such as `"csv"`.
+
+  It should return a Pandas DataFrame representing the content of the specified file. [`steps/ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py) contains an example placeholder function.
+ 
+  <u>Example</u>: 
+    ```
+    loader_method: load_file_as_dataframe
+    ```
+
+Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+```
+steps:
+  ingest:
+    using: "custom"
+    location: "./data/sample.csv"
+    loader_method: load_file_as_dataframe
+```
 </details>
 
 **Step artifacts**
