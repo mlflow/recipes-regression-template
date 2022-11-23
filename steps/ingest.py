@@ -16,7 +16,7 @@ def load_file_as_dataframe(location: str) -> DataFrame:
     called once for each file in the dataset, and MLflow Recipes automatically combines the
     resulting DataFrames together.
 
-    :param file_path: The path to the dataset file.
+    :param location: The path to the dataset file.
     :param file_format: The file format string, such as "csv".
     :return: A Pandas DataFrame representing the content of the specified file.
     """
