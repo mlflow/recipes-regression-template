@@ -7,7 +7,7 @@ This module defines the following routines used by the 'ingest' step of the regr
 from pandas import DataFrame
 
 
-def load_file_as_dataframe(file_path: str, file_format: str) -> DataFrame:
+def load_file_as_dataframe(location: str) -> DataFrame:
     """
     Load content from the specified dataset file as a Pandas DataFrame.
 
