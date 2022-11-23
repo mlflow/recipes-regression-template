@@ -38,6 +38,7 @@ steps:
     #                   arbitrary transformations should go into the transform step.
     post_split_filter_method: create_dataset_filter
   transform:
+    using: "custom"
     #
     #  FIXME::OPTIONAL: Specifies the method that defines an sklearn-compatible transformer, which
     #                   applies input feature transformation during model training and inference.
