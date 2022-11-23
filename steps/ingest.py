@@ -17,7 +17,6 @@ def load_file_as_dataframe(location: str) -> DataFrame:
     resulting DataFrames together.
 
     :param location: The path to the dataset file.
-    :param file_format: The file format string, such as "csv".
     :return: A Pandas DataFrame representing the content of the specified file.
     """
     # FIXME::OPTIONAL: implement the handling of non-natively supported file_format.
