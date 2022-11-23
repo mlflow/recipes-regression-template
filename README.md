@@ -133,15 +133,12 @@ The name of the primary evaluation metric.
   ```
 
 ### Ingest step
-The ingest step resolves the dataset specified by the `steps.ingest` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml)
-and converts it to parquet format, leveraging the custom loader code specified in the `steps.ingest` section if necessary.  
+The ingest step loads the dataset specified by the `steps.ingest` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml).  
 **Note**: If you make changes to the dataset referenced by the ingest step (e.g. by adding new records or columns), 
 you must manually re-run the ingest step in order to use the updated dataset in the recipe. 
 The ingest step does not automatically detect changes in the dataset.
 
-Below are all the possible options and full reference guide for different configurations allowed in ingest step:
-
-The input dataset is specified by the `steps.ingest` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml) as follows: 
+Below are all the possible options and full reference guide for different configurations allowed in the ingest step: 
 
 <details>
 <summary><strong><u>Using: "parquet"</u></strong></summary>
@@ -243,14 +240,13 @@ One may specify multiple data locations by a list of locations as long as they h
 Method name of the custom loader function from `steps/ingest.py`. The custom loader function allows use of datasets in other formats, such as `csv`. 
 The function should be defined in [`steps/ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py),
 and should accept two parameters:
-  - `file_path`: `str`. Path to the dataset file.
-  - `file_format`: `str`. The file format string, such as `"csv"`.
+  - `location`: `str`. Path to the dataset file.
 
   It should return a Pandas DataFrame representing the content of the specified file. [`steps/ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py) contains an example placeholder function.
  
   <u>Example</u>: 
     ```
-    loader_method: load_file_as_dataframe
+    loader_method: read_csv_as_dataframe
     ```
 
 Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
@@ -259,8 +255,17 @@ steps:
   ingest:
     using: "custom"
     location: "./data/sample.csv"
-    loader_method: load_file_as_dataframe
+    loader_method: read_csv_as_dataframe
 ```
+
+Example loader_method function for [`ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py)
+```
+def read_csv_as_dataframe(location: str) -> DataFrame:
+  import pandas
+
+  return pandas.read_csv(location, index_col=0)
+```
+ 
 </details>
 
 **Step artifacts**
