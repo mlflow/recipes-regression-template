@@ -91,7 +91,6 @@ A detailed reference for each step follows.
  * [Reference](#reference)
     + [Step artifacts](#step-artifacts)
     + [Ingest step](#ingest-step)
-      - [Data](#data)
     + [Split step](#split-step)
     + [Transform step](#transform-step)
     + [Train step](#train-step)
@@ -100,7 +99,8 @@ A detailed reference for each step follows.
     + [Batch scoring](#batch-scoring)
       - [Ingest Scoring step](#ingest-scoring-step)
       - [Predict step](#predict-step)
-    + [MLflow Tracking / Model Registry configuration](#mlflow-tracking--model-registry-configuration)
+    + [MLflow Tracking](#mlflow-tracking)
+    + [Model Registry configuration](#model-registry-configuration)
     + [Metrics](#metrics)
       - [Built-in metrics](#built-in-metrics)
       - [Custom metrics](#custom-metrics)
@@ -268,7 +268,7 @@ def read_csv_as_dataframe(location: str) -> DataFrame:
  
 </details>
 
-**Step artifacts**
+**Step artifacts**:
 - `ingested_data`: The ingested data as a Pandas DataFrame.
 
 ### Split step
@@ -321,24 +321,47 @@ The transform step uses the training dataset created by the split step to fit a 
 user-defined transformations. The transformer is then applied to the training dataset and the validation dataset, 
 creating transformed datasets that are used by subsequent steps for estimator training and model performance evaluation.
 
-The user-defined transformation function is not required. If absent, an **identity transformer** will be used.
+The transform step is configured by the `steps.transform` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+Note: The `steps.transform` section is not required. If absent, an **identity transformer** will be used.
+
+Below are all the possible options and full reference guide for different configurations allowed in the transform step:
+
+<details>
+<summary><strong><u>Using: "custom"</u></strong></summary>
+
+- `transformer_method`: string. Optional.  
 The user-defined function should be written in
 [`steps/transform.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/transform.py), 
 and should return an unfitted estimator that is sklearn-compatible; that is, the returned object should define 
 `fit()` and `transform()` methods. `steps/transform.py` contains an example placeholder function.
-
-The transform step is configured by the `steps.transform` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
-<details>
-<summary><strong><u>Full configuration reference</u></strong></summary>
-
-- `transformer_method`: string. Optional.  
-Name of the method specified in `steps/transform.py` that returns an `sklearn`-compatible transformer which applies
-feature transformation during model training and inference. If absent, an identity transformer with will be used.
+The config mentions the name of the method specified in `steps/transform.py`. If absent, an identity transformer with will be used.
 <u>Example</u>:
   ```
   transformer_method: transformer_fn
   ```
 
+  Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+  ```
+  steps:
+    transform:
+      using: "custom"
+      transformer_method: transformer_fn
+  ```
+
+  Example transformer_fn function for [`transform.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/transform.py)
+  ```
+  def transformer_fn(location: str) -> DataFrame:
+    from sklearn.preprocessing import StandardScaler
+
+        return Pipeline(
+        steps=[
+            (
+                "scale_features",
+                StandardScaler(),
+            )
+        ]
+    )
+  ```
 </details>
 
 **Step artifacts**:
@@ -355,87 +378,100 @@ the transformed training and validation datasets to compute performance metrics.
 
 Custom evaluation metrics are computed according to definitions in [`steps/custom_metrics.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/custom_metrics.py)
 and the `metrics` section of `recipe.yaml`; see [Custom Metrics](#custom-metrics) section for reference. 
+Hyper-parameter tuning during the train step can also be enabled as a step config in the `steps.train` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml).
 
 The model recipe and its associated parameters, performance metrics, and lineage information are logged to [MLflow Tracking](https://www.mlflow.org/docs/latest/tracking.html), producing an MLflow Run.
 
-The train step is configured by the `steps.train` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+The train step is configured by the `steps.train` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml).
 
-If using AutoML to train, specify:
-```
-using: automl/flaml
-```
-
-Otherwise, if using a user-defined estimator function to train, specify:
-```
-using: custom
-```
-
-The user-defined estimator function should be written in [`steps/train.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/train.py), 
-and should return an unfitted estimator that is `sklearn`-compatible; that is, the returned object should define 
-`fit()` and `transform()` methods. `steps/train.py` contains an example placeholder function.
+Below are all the possible options and full reference guide for different configurations allowed in the train step:
 
 <details>
-<summary><strong><u>Full configuration reference</u></strong></summary>
+<summary><strong><u>Using: "automl/flaml"</u></strong></summary>
 
-- `using`: string. Required.  
-`automl/flaml` if using AutoML to train or `custom` if using a user-defined estimator to train.
+  - `time_budget_secs`: float. Optional.  
+  A float number of the time budget in seconds. Default to 10 seconds.
 
-- AutoML configuration reference
-   - `time_budget_secs`: float. Optional.  
-   A float number of the time budget in seconds. Default to 10 seconds.
+  - `flaml_params`: Dict. Optional.  
+  Any additional parameters to pass along to FLAML.
 
-   - `flaml_params`: Dict. Optional.  
-   Any additional parameters to pass along to FLAML.
-
-- `estimator_method`: string. Required.  
-Name of the method specified in `steps/train.py` that returns an `sklearn`-compatible estimator
-used for model training.  
-<u>Example</u>:
+  Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
   ```
-  estimator_method: estimator_fn
+  steps:
+    train:
+      using: "automl/flaml"
+      time_budget_secs: 3000
   ```
+</details>
 
-- Tuning configuration reference
+<details>
+<summary><strong><u>Using: "custom"</u></strong></summary>
 
-   - `enabled`: boolean. Required.  
-   Indicates whether or not tuning is enabled.
+  - `estimator_method`: string. Required. 
+  The user-defined estimator function should be written in [`steps/train.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/train.py), 
+  and should return an unfitted estimator that is `sklearn`-compatible; that is, the returned object should define 
+  `fit()` and `transform()` methods. `steps/train.py` contains an example placeholder function.
+  The config mentions the name of the method specified in `steps/train.py`.
 
-   - `max_trials`: int. Required.  
-   Max tuning trials to run.
+    <u>Example</u>:
 
-   - `algorithm`: string. Optional.  
-   Indicates whether or not tuning is enabled.
+    ```
+    estimator_method: estimator_fn
+    ```
 
-   - `early_stop_fn`: string. Optional.  
-   Early stopping function to be passed to `hyperopt`.
+  - <strong>Tuning configuration reference</strong>
 
-   - `parallelism`: int. Optional.  
-   Number of workers to run `hyperopt` across.
+    - `enabled`: boolean. Required.  
+    Indicates whether or not tuning is enabled.
 
-   - `sample_fraction`: float. Optional.  
-   Sampling fraction in the range `(0, 1.0]` to indicate the amount of data used in tuning.
+    - `max_trials`: int. Required.  
+    Max tuning trials to run.
 
-   - `parameters`: list. Required.  
-   `hyperopt` search space in yaml format.
+    - `algorithm`: string. Optional.  
+    Indicates whether or not tuning is enabled.
 
-  <u>Example</u>:
+    - `early_stop_fn`: string. Optional.  
+    Early stopping function to be passed to `hyperopt`.
+
+    - `parallelism`: int. Optional.  
+    Number of workers to run `hyperopt` across.
+
+    - `sample_fraction`: float. Optional.  
+    Sampling fraction in the range `(0, 1.0]` to indicate the amount of data used in tuning.
+
+    - `parameters`: list. Required.  
+    `hyperopt` search space in yaml format.
+
+  Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
   ```
-  tuning:
-    enabled: True
-    algorithm: "hyperopt.rand.suggest"
-    max_trials: 5
-    early_stop_fn: "hyperopt.early_stop.no_progress_loss(10)"
-    parallelism: 1
-    sample_fraction: 0.5
-    parameters:
-        alpha:
-          distribution: "uniform"
-          low: 0.0
-          high: 0.01
-        penalty:
-          values: ["l1", "l2", "elasticnet"]
+  steps:
+    train:
+      using: "custom"
+      estimator_method: estimator_fn
+      tuning:
+        enabled: True
+        algorithm: "hyperopt.rand.suggest"
+        max_trials: 5
+        early_stop_fn: "hyperopt.early_stop.no_progress_loss(10)"
+        parallelism: 1
+        sample_fraction: 0.5
+        parameters:
+            alpha:
+              distribution: "uniform"
+              low: 0.0
+              high: 0.01
+            penalty:
+              values: ["l1", "l2", "elasticnet"]
   ```
+  Example estimator_fn function for [`train.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/train.py)
+  ```
+  from typing import Dict, Any
 
+  def estimator_fn(estimator_params: Dict[str, Any] = None):
+      from sklearn.linear_model import SGDRegressor
+
+      return SGDRegressor(random_state=42, **estimator_params)
+  ```
 </details>
 
 **Step artifacts**:
@@ -513,6 +549,7 @@ specifies the dataset used for batch scoring and has the same API as the [ingest
 **Step artifacts**:
 - `ingested_scoring_data`: the ingested scoring data as a Pandas DataFrame.
 
+
 #### Predict step
 The predict step uses the model registered by the [register step](#register-step) to score the 
 ingested dataset produced by the [ingest scoring step](#ingest-scoring-step) and writes the resulting 
@@ -570,7 +607,7 @@ for more information.
 - `scored_data`: the scored dataset, with model predictions under the `prediction` column, as a Pandas DataFrame.
 
 
-### MLflow Tracking / Model Registry configuration
+### MLflow Tracking
 The MLflow Tracking server can be configured to log MLflow runs to a specific server. Tracking information is specified
 in the profile configuration files - [`profiles/local.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/profiles/local.yaml)
 if running locally and [`profiles/databricks.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/profiles/databricks.yaml) 
@@ -593,8 +630,16 @@ URI of the MLflow tracking server to log runs to. Alternatively, the `MLFLOW_TRA
 - `artifact_location`: string. Optional. 
 URI of the location to log run artifacts to.
 
+Example experiment config in [`profile.yaml`](https://github.com/mlflow/recipes-regression-template/tree/main/profiles)
+  ```
+  experiment:
+    name: "experiment-name"
+    tracking_uri: "sqlite:///metadata/mlflow/mlruns.db"
+    artifact_location: "./metadata/mlflow/mlartifacts"
+  ```
 </details>
 
+### Model Registry configuration
 To register trained models to the MLflow Model Registry, further configuration may be required. If unspecified, models will be logged to the same server as specified in the tracking URI. 
 
 To register models to a different server, specify the desired server in the `model_registry` section in the profile configuration:
@@ -607,6 +652,12 @@ URI of the model registry server to which to register trained models.
 - `model_name`: string. Required.  
 Specifies the name to use when registering the trained model to the model registry.
 
+Example experiment config in [`profile.yaml`](https://github.com/mlflow/recipes-regression-template/tree/main/profiles)
+  ```
+  model_registry:
+    registry_uri: "sqlite:///metadata/mlflow/registry.db"
+    model_name: "model-name"
+  ```
 </details>
 
 ### Custom Metrics
@@ -640,18 +691,7 @@ The following metrics are built-in. Note that `greater_is_better = False` for al
 Custom evaluation metrics define how trained models should be evaluated against custom criteria not captured by 
 built-in `sklearn` evaluation metrics.
 
-Custom evaluation metric functions should be defined in [`steps/custom_metrics.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/custom_metrics.py). 
-Each should accept two parameters:
-- `eval_df`: DataFrame.  
-A Pandas DataFrame containing two columns:
-  - `prediction`: Predictions produced by submitting input data to the model.
-  - `target`: Corresponding target truth values.
-
-
-- `builtin_metrics`: `Dict[str, float]`.  
-The built-in metrics calculated during model evaluation. Maps metric names to corresponding scalar values.
-
-The custom metric function should return a scalar numeric value.
+Custom evaluation metric functions should be defined in [`steps/custom_metrics.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/custom_metrics.py). Function to define the custom_metrics should adhere to the following [signature](https://www.mlflow.org/docs/latest/python_api/mlflow.models.html#mlflow.models.EvaluationMetric).
 
 Custom metrics are specified as a list under the `metrics.custom` key in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml), specified as follows:
 - `name`: string. Required.  
