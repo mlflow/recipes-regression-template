@@ -452,7 +452,7 @@ Below are all the possible options and full reference guide for different config
         enabled: True
         algorithm: "hyperopt.rand.suggest"
         max_trials: 5
-        early_stop_fn: "hyperopt.early_stop.no_progress_loss(10)"
+        early_stop_fn: my_early_stop_fn
         parallelism: 1
         sample_fraction: 0.5
         parameters:
@@ -471,6 +471,10 @@ Below are all the possible options and full reference guide for different config
       from sklearn.linear_model import SGDRegressor
 
       return SGDRegressor(random_state=42, **estimator_params)
+  
+  def my_early_stop_fn(*args):
+    from hyperopt.early_stop import no_progress_loss
+    return no_progress_loss(10)(*args)
   ```
 </details>
 
