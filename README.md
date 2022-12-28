@@ -259,7 +259,7 @@ steps:
 ```
 
 Example loader_method function for [`ingest.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/ingest.py)
-```
+```python
 def read_csv_as_dataframe(location: str) -> DataFrame:
   import pandas
 
@@ -278,9 +278,6 @@ The split step splits the ingested dataset produced by the ingest step into:
 - a validation dataset for model performance evaluation & tuning, and 
 - a test dataset for model performance evaluation.  
 
-The fraction of records allocated to each dataset is defined by the `split_ratios` attribute of the `split` step
-definition in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml). 
-The split step also preprocesses the datasets using logic defined in [`steps/split.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/split.py).
 Subsequent steps use these datasets to develop a model and measure its performance.
 
 The post-split method should be written in `steps/split.py` and should accept three parameters:
@@ -291,22 +288,117 @@ The post-split method should be written in `steps/split.py` and should accept th
 It should return a triple representing the processed train, validation and test datasets. `steps/split.py` contains an example placeholder function.
 
 The split step is configured by the `steps.split` section in `recipe.yaml` as follows:
-<details>
-<summary><strong><u>Full configuration reference</u></strong></summary>
 
-- `split_ratios`: list. Optional.  
-A YAML list specifying the ratios by which to split the dataset into training, validation and test sets.  
-<u>Example</u>: 
+<details>
+<summary><strong><u>Using: "custom"</u></strong></summary>
+
+- `split_method`: string. Required. The user-defined split function should be written in steps/split.py, 
+and should return a Series with each element to be either 'TRAINING', 'VALIDATION' or 'TEST' indicating
+whether each  row should should be part of which split. 
+<u>Example</u>:
   ```
-  split_ratios: [0.75, 0.125, 0.125] # Defaults to this ratio if unspecified
+  split_method: custom_split
   ```
+
 - `post_split_filter_method`: string. Optional.
 Name of the method specified in `steps/split.py` used to "post-process" the split datasets.  
 This procedure is meant for removing/filtering records, or other cleaning processes. Arbitrary data transformations 
 should be done in the transform step.  
 <u>Example</u>:
   ```
-  post_split_filter_method: process_splits
+  post_split_filter_method: create_dataset_filter
+  ```
+
+  Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+  ```
+  steps:
+    split:
+      using: custom
+      split_method: custom_split
+      post_split_filter_method: create_dataset_filter
+  ```
+  Example create_dataset_filter function for [`split.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/split.py)
+  ```python
+  def custom_split(df):
+    """
+    Mark rows of the ingested datasets to be split into training, validation, and test datasets.
+    :param dataset: The dataset produced by the data ingestion step.
+    :return: Series of strings with each element to be either 'TRAINING', 'VALIDATION' or 'TEST'
+    """
+    from pandas import Series
+
+    splits = Series("TRAINING", index=range(len(df)))
+    # 3rd quarter is validation data
+    splits[df["year"] >= 3] = "VALIDATION"
+    # 4th quarter is testing data
+    splits[df["year"] >= 4] = "TEST"
+
+    return splits
+
+  def create_dataset_filter(dataset: DataFrame) -> Series(bool):
+    """
+    Mark rows of the split datasets to be additionally filtered. This function will be called on
+    the training, validation, and test datasets.
+    :param dataset: The {train,validation,test} dataset produced by the data splitting procedure.
+    :return: A Series indicating whether each row should be filtered
+    """
+
+    return (
+        (dataset["fare_amount"] > 0)
+        & (dataset["trip_distance"] < 400)
+        & (dataset["trip_distance"] > 0)
+        & (dataset["fare_amount"] < 1000)
+    ) | (~dataset.isna().any(axis=1))
+  ```
+
+
+</details>
+
+<details>
+<summary><strong><u>Using: "split_ratios"</u></strong></summary>
+
+- `split_ratios`: list. Optional.
+The fraction of records allocated to each dataset is defined by the `split_ratios` attribute of the `split` step
+definition in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml)
+specifying the ratios by which to split the dataset into training, validation and test sets.  
+<u>Example</u>: 
+  ```
+  split_ratios: [0.75, 0.125, 0.125] # Defaults to this ratio if unspecified
+  ```
+
+- `post_split_filter_method`: string. Optional.
+Name of the method specified in `steps/split.py` used to "post-process" the split datasets.  
+This procedure is meant for removing/filtering records, or other cleaning processes. Arbitrary data transformations 
+should be done in the transform step.  
+<u>Example</u>:
+  ```
+  post_split_filter_method: create_dataset_filter
+  ```
+
+  Example config in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml):
+  ```
+  steps:
+    split:
+      using: split_ratios
+      split_ratios: [0.75, 0.125, 0.125]
+      post_split_filter_method: create_dataset_filter
+  ```
+  Example create_dataset_filter function for [`split.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/split.py)
+  ```python
+  def create_dataset_filter(dataset: DataFrame) -> Series(bool):
+    """
+    Mark rows of the split datasets to be additionally filtered. This function will be called on
+    the training, validation, and test datasets.
+    :param dataset: The {train,validation,test} dataset produced by the data splitting procedure.
+    :return: A Series indicating whether each row should be filtered
+    """
+
+    return (
+        (dataset["fare_amount"] > 0)
+        & (dataset["trip_distance"] < 400)
+        & (dataset["trip_distance"] > 0)
+        & (dataset["fare_amount"] < 1000)
+    ) | (~dataset.isna().any(axis=1))
   ```
 </details>
 
@@ -349,7 +441,7 @@ The config mentions the name of the method specified in `steps/transform.py`. If
   ```
 
   Example transformer_fn function for [`transform.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/transform.py)
-  ```
+  ```python
   def transformer_fn(location: str) -> DataFrame:
     from sklearn.preprocessing import StandardScaler
 
@@ -464,7 +556,7 @@ Below are all the possible options and full reference guide for different config
               values: ["l1", "l2", "elasticnet"]
   ```
   Example estimator_fn function for [`train.py`](https://github.com/mlflow/recipes-regression-template/blob/main/steps/train.py)
-  ```
+  ```python
   from typing import Dict, Any
 
   def estimator_fn(estimator_params: Dict[str, Any] = None):
