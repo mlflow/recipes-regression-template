@@ -22,7 +22,7 @@ target_col: ""
 #                  metric is used to select best performing models in MLflow UI as well as in
 #                  train and evaluation step.
 #                  Built-in metrics are: example_count, mean_absolute_error, mean_squared_error,
-#                  root_mean_squared_error, sum_on_label, mean_on_label, r2_score, max_error,
+#                  root_mean_squared_error, sum_on_label, mean_on_label, max_error,
 #                  mean_absolute_percentage_error
 primary_metric: ""
 steps:
