@@ -635,8 +635,9 @@ registered in this step.
 
 
 ### Batch scoring
-After model training, the regression recipe provides the capability to score new data with the
-trained model.
+After model training, the regression recipe provides the capability to score data with the
+trained model. This is convenient for scoring a static dataset, e.g., the test set from a Kaggle competition.
+For more advanced ETL workflows for scoring, we recommend using [`spark_udf`](https://mlflow.org/docs/latest/python_api/mlflow.pyfunc.html#mlflow.pyfunc.spark_udf) directly instead, because it is more flexible to handle different data scenarios.
 
 #### Ingest Scoring step
 The ingest scoring step, defined in the `steps.ingest_scoring` section in [`recipe.yaml`](https://github.com/mlflow/recipes-regression-template/blob/main/recipe.yaml), 
