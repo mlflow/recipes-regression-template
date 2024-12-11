@@ -41,7 +41,7 @@ Your contribution to MLflow Recipes is greatly appreciated by the community!
 To use this MLflow regression recipe,
 simply install the packages listed in the `requirements.txt` file. Note that `Python 3.8` or above is recommended.
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 You may need to install additional libraries for extra features:
